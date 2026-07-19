@@ -36,7 +36,7 @@ pub mod test {
     use crate::prelude::*;
     use serde::{Deserialize, Serialize};
 
-    use std::{fmt::Debug, str::FromStr, sync::Arc};
+    use std::{fmt::Debug, str::FromStr};
 
     #[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
     pub enum Verdict {
@@ -98,16 +98,11 @@ pub mod test {
         }
     }
 
-    use crate::logger::short_str;
-
     #[derive(Clone)]
     pub struct Result {
         pub verdict: Verdict,
         pub time: f64,
         pub memory: u64,
-
-        pub output: Arc<str>,
-        pub message: Arc<str>,
     }
 
     impl Debug for Result {
@@ -116,8 +111,6 @@ pub mod test {
                 .field("verdict", &self.verdict)
                 .field("time", &self.time)
                 .field("memory", &self.memory)
-                .field("output", &short_str(&self.output))
-                .field("message", &short_str(&self.message))
                 .finish()
         }
     }
