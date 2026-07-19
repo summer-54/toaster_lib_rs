@@ -3,7 +3,7 @@ use uuid::Uuid;
 use crate::prelude::*;
 
 use crate::{
-    judge::{Lang, submission, test::Verdict},
+    judge::{Lang, submission, test},
     logger::short_slice,
 };
 
@@ -76,12 +76,10 @@ pub enum InvokerToManager {
         token: uuid::Uuid,
         name: Box<str>,
     },
-    FullResult(crate::judge::submission::Result),
+    FullResult(submission::Result),
     TestResult {
         test_id: usize,
-        verdict: Verdict,
-        time: f64,
-        memory: u64,
+        result: test::Result,
         data: Box<[u8]>,
     },
     Exited {
@@ -108,16 +106,12 @@ impl std::fmt::Debug for InvokerToManager {
             Self::FullResult(result) => f.debug_tuple("FullResult").field(result).finish(),
             Self::TestResult {
                 test_id,
-                verdict,
-                time,
-                memory,
+                result,
                 data,
             } => f
                 .debug_struct("TestVerdict")
                 .field("test_id", test_id)
-                .field("verdict", verdict)
-                .field("time", time)
-                .field("memory", memory)
+                .field("result", result)
                 .field("data", &Box::<[u8]>::from(short_slice(data)))
                 .finish(),
             Self::Exited { code, data } => f
@@ -176,21 +170,23 @@ impl super::Income for InvokerToManager {
                     .ok_or(anyhow!("{} field not found", "ID".bold()))?
                     .parse()
                     .context("parsing 'ID' field")?,
-                verdict: msg
-                    .field("NAME")
-                    .ok_or(anyhow!("{} field not found", "NAME".bold()))?
-                    .parse()
-                    .context("parsing 'NAME' field")?,
-                time: msg
-                    .field("TIME")
-                    .ok_or(anyhow!("{} field not found", "TIME".bold()))?
-                    .parse()
-                    .context("parsing 'TIME' field")?,
-                memory: msg
-                    .field("MEMORY")
-                    .ok_or(anyhow!("{} field not found", "MEMORY".bold()))?
-                    .parse()
-                    .context("parsing 'MEMORY' field")?,
+                result: test::Result {
+                    verdict: msg
+                        .field("NAME")
+                        .ok_or(anyhow!("{} field not found", "NAME".bold()))?
+                        .parse()
+                        .context("parsing 'NAME' field")?,
+                    time: msg
+                        .field("TIME")
+                        .ok_or(anyhow!("{} field not found", "TIME".bold()))?
+                        .parse()
+                        .context("parsing 'TIME' field")?,
+                    memory: msg
+                        .field("MEMORY")
+                        .ok_or(anyhow!("{} field not found", "MEMORY".bold()))?
+                        .parse()
+                        .context("parsing 'MEMORY' field")?,
+                },
                 data: msg
                     .data()
                     .ok_or(anyhow!("{} not found", "data".bold()))?
@@ -271,17 +267,15 @@ impl super::Outgo for InvokerToManager {
             }
             Self::TestResult {
                 test_id,
-                verdict,
-                time,
-                memory,
+                result,
                 data,
             } => {
                 let mut body = RawMessage::new("TEST");
                 body.add_fields(vec![
                     (&"ID", &test_id),
-                    (&"VERDICT", &verdict),
-                    (&"TIME", &time),
-                    (&"MEMORY", &memory),
+                    (&"VERDICT", &result.verdict),
+                    (&"TIME", &result.time),
+                    (&"MEMORY", &result.memory),
                 ])
                 .set_data(data);
                 body
