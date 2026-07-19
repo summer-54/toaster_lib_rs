@@ -1,4 +1,5 @@
 pub mod stream;
+pub mod websocket;
 use crate::prelude::*;
 use std::{collections::HashMap, sync::Arc};
 
