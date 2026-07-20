@@ -7,6 +7,8 @@ use crate::{
     logger::short_slice,
 };
 
+pub const NAME: &str = "MASTER";
+
 use super::{MappedRawMessage, RawMessage};
 
 #[allow(dead_code)]

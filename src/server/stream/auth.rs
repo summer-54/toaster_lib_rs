@@ -5,6 +5,7 @@ use invoker_auth::{Challenge, Solution};
 use crate::logger::short_slice;
 
 use super::{MappedRawMessage, RawMessage};
+pub const NAME: &str = "AUTH";
 
 #[allow(dead_code)]
 pub enum ManagerToInvoker {
