@@ -1,6 +1,6 @@
 use crate::prelude::*;
 
-use invoker_auth::{Challenge, Solution};
+use crate::auth::{Challenge, Solution};
 
 use crate::logger::short_slice;
 
