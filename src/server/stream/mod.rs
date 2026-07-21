@@ -29,6 +29,6 @@ impl<T: Into<RawMessage>> Outgo for T {
 }
 
 pub trait Stream<I: Income, O: Outgo> {
-    fn recv(&self) -> impl Future<Output = Option<Result<I>>> + Send;
+    fn recv(&self) -> impl Future<Output = Result<I>> + Send;
     fn send(&self, msg: O) -> impl Future<Output = Result<()>> + Send;
 }
