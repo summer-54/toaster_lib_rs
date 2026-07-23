@@ -69,30 +69,18 @@ impl super::Outgo for ManagerToInvoker {
 #[allow(dead_code)]
 pub enum InvokerToManager {
     FullResult(submission::Result),
-    TestResult {
-        test_id: usize,
-        result: test::Result,
-        data: Box<[u8]>,
-    },
-    Error {
-        msg: Box<str>,
-    },
-    OpError {
-        msg: Box<str>,
-    },
+    TestResult(test::ResultPayload),
+    Error { msg: Box<str> },
+    OpError { msg: Box<str> },
 }
 
 impl std::fmt::Debug for InvokerToManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::FullResult(result) => f.debug_tuple("FullResult").field(result).finish(),
-            Self::TestResult {
-                test_id,
-                result,
-                data,
-            } => f
+            Self::TestResult(test::ResultPayload { id, result, data }) => f
                 .debug_struct("TestVerdict")
-                .field("test_id", test_id)
+                .field("id", id)
                 .field("result", result)
                 .field("data", &Box::<[u8]>::from(short_slice(data)))
                 .finish(),
@@ -141,8 +129,8 @@ impl super::Income for InvokerToManager {
                     }
                 },
             ),
-            "TEST" => InvokerToManager::TestResult {
-                test_id: msg
+            "TEST" => InvokerToManager::TestResult(test::ResultPayload {
+                id: msg
                     .field("ID")
                     .ok_or(anyhow!("{} field not found", "ID".bold()))?
                     .parse()
@@ -168,7 +156,7 @@ impl super::Income for InvokerToManager {
                     .data()
                     .ok_or(anyhow!("{} not found", "data".bold()))?
                     .into(),
-            },
+            }),
             "ERROR" => InvokerToManager::Error {
                 msg: msg
                     .field("MESSAGE")
@@ -219,14 +207,10 @@ impl super::Outgo for InvokerToManager {
                 }
                 body
             }
-            Self::TestResult {
-                test_id,
-                result,
-                data,
-            } => {
+            Self::TestResult(test::ResultPayload { id, result, data }) => {
                 let mut body = RawMessage::new("TEST");
                 body.add_fields(vec![
-                    (&"ID", &test_id),
+                    (&"ID", &id),
                     (&"VERDICT", &result.verdict),
                     (&"TIME", &result.time),
                     (&"MEMORY", &result.memory),

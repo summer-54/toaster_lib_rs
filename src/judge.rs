@@ -119,6 +119,12 @@ pub mod test {
                 .finish()
         }
     }
+
+    pub struct ResultPayload {
+        pub result: Result,
+        pub id: usize,
+        pub data: Box<[u8]>,
+    }
 }
 pub mod submission {
     #[derive(Debug, Clone)]
