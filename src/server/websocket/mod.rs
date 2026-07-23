@@ -18,34 +18,12 @@ use tokio::{
 use std::{collections::HashMap, sync::Arc};
 
 use super::{
-    MappedRawMessage, RawMessage,
+    RawMessage,
     stream::{self},
+    stream::{Income, Outgo},
 };
 
 const MAX_MESSAGE_SIZE: usize = 1 << 31;
-
-#[allow(dead_code)]
-pub trait Income: Sized {
-    fn from_raw(msg: MappedRawMessage) -> Result<Self>;
-}
-#[allow(dead_code)]
-pub trait Outgo {
-    fn into_raw(self) -> RawMessage;
-}
-
-impl<T: TryFrom<MappedRawMessage, Error = impl std::error::Error + Sync + Send + 'static>> Income
-    for T
-{
-    fn from_raw(msg: MappedRawMessage) -> Result<Self> {
-        Ok(Self::try_from(msg)?)
-    }
-}
-
-impl<T: Into<RawMessage>> Outgo for T {
-    fn into_raw(self) -> RawMessage {
-        self.into()
-    }
-}
 
 pub struct Stream<I> {
     name: Box<str>,
