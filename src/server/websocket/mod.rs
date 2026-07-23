@@ -18,19 +18,42 @@ use tokio::{
 use std::{collections::HashMap, sync::Arc};
 
 use super::{
-    RawMessage,
-    stream::{self, Income, Outgo},
+    MappedRawMessage, RawMessage,
+    stream::{self},
 };
 
 const MAX_MESSAGE_SIZE: usize = 1 << 31;
 
-pub struct Stream {
-    name: Box<str>,
-    channel: Arc<Channel>,
-    receiver: Mutex<UnboundedReceiver<RawMessage>>,
+#[allow(dead_code)]
+pub trait Income: Sized {
+    fn from_raw(msg: MappedRawMessage) -> Result<Self>;
+}
+#[allow(dead_code)]
+pub trait Outgo {
+    fn into_raw(self) -> RawMessage;
 }
 
-impl<I: Income, O: Outgo + Send> stream::Stream<I, O> for Stream {
+impl<T: TryFrom<MappedRawMessage, Error = impl std::error::Error + Sync + Send + 'static>> Income
+    for T
+{
+    fn from_raw(msg: MappedRawMessage) -> Result<Self> {
+        Ok(Self::try_from(msg)?)
+    }
+}
+
+impl<T: Into<RawMessage>> Outgo for T {
+    fn into_raw(self) -> RawMessage {
+        self.into()
+    }
+}
+
+pub struct Stream<I> {
+    name: Box<str>,
+    channel: Arc<Channel>,
+    receiver: Mutex<UnboundedReceiver<I>>,
+}
+
+impl<I: Income, O: Outgo + Send> stream::Stream<I, O> for Stream<RawMessage> {
     async fn recv(&self) -> Result<I> {
         I::from_raw(
             self.receiver
@@ -96,7 +119,7 @@ impl Channel {
         Ok(Self::new(write, read))
     }
 
-    pub async fn new_stream(self: &Arc<Self>, name: &str) -> Stream {
+    pub async fn new_stream(self: &Arc<Self>, name: &str) -> Stream<RawMessage> {
         let (sender, receiver) = unbounded_channel();
         let receiver = Mutex::new(receiver);
         let mut streams = self.streams.lock().await;

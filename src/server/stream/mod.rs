@@ -22,14 +22,13 @@ impl<T: TryFrom<MappedRawMessage, Error = impl std::error::Error + Sync + Send +
         Ok(Self::try_from(msg)?)
     }
 }
-
 impl<T: Into<RawMessage>> Outgo for T {
     fn into_raw(self) -> RawMessage {
         self.into()
     }
 }
 
-pub trait Stream<I: Income, O: Outgo> {
+pub trait Stream<I, O> {
     fn recv(&self) -> impl Future<Output = Result<I>> + Send;
     fn send(&self, msg: O) -> impl Future<Output = Result<()>> + Send;
 }
