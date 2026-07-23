@@ -8,14 +8,12 @@ use super::{MappedRawMessage, RawMessage};
 
 #[allow(dead_code)]
 pub enum ManagerToInvoker {
-    Stop,
     Close,
 }
 
 impl std::fmt::Debug for ManagerToInvoker {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Stop => write!(f, "Stop"),
             Self::Close => write!(f, "Close"),
         }
     }
@@ -24,7 +22,6 @@ impl std::fmt::Debug for ManagerToInvoker {
 impl super::Income for ManagerToInvoker {
     fn from_raw(msg: MappedRawMessage) -> Result<Self> {
         Ok(match msg.ty() {
-            "STOP" => Self::Stop,
             "CLOSE" => Self::Close,
             command => {
                 bail!("incorrect command '{}'", command.bold());
@@ -36,7 +33,6 @@ impl super::Income for ManagerToInvoker {
 impl super::Outgo for ManagerToInvoker {
     fn into_raw(self) -> RawMessage {
         match self {
-            Self::Stop => RawMessage::new("STOP"),
             Self::Close => RawMessage::new("CLOSE"),
         }
     }

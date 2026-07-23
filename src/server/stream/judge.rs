@@ -13,7 +13,6 @@ use super::{MappedRawMessage, RawMessage};
 pub enum ManagerToInvoker {
     Run { lang: Lang, data: Box<[u8]> },
     Stop,
-    Close,
 }
 
 impl std::fmt::Debug for ManagerToInvoker {
@@ -25,7 +24,6 @@ impl std::fmt::Debug for ManagerToInvoker {
                 .field("data", &Box::<[u8]>::from(short_slice(data)))
                 .finish(),
             Self::Stop => write!(f, "Stop"),
-            Self::Close => write!(f, "Close"),
         }
     }
 }
@@ -47,7 +45,6 @@ impl super::Income for ManagerToInvoker {
                 }
             }
             "STOP" => Self::Stop,
-            "CLOSE" => Self::Close,
             command => {
                 bail!("incorrect command '{}'", command.bold());
             }
@@ -65,7 +62,6 @@ impl super::Outgo for ManagerToInvoker {
                 body
             }
             Self::Stop => RawMessage::new("STOP"),
-            Self::Close => RawMessage::new("CLOSE"),
         }
     }
 }
