@@ -5,7 +5,7 @@ use crate::{
     logger::short_slice,
 };
 
-pub const NAME: &str = "MASTER";
+pub const NAME: &str = "judge";
 
 use super::{MappedRawMessage, RawMessage};
 

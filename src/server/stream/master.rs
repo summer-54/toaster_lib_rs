@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::prelude::*;
 
-pub const NAME: &str = "MASTER";
+pub const NAME: &str = "master";
 
 use super::{MappedRawMessage, RawMessage};
 
