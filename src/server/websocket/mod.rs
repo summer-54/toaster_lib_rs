@@ -123,7 +123,7 @@ impl Channel {
                 continue;
             };
             let stream_name = String::from_utf8(buf[..endl_pos].into())?;
-            let msg = match RawMessage::try_from(&buf[endl_pos..]) {
+            let msg = match RawMessage::try_from(&buf[endl_pos + 1..]) {
                 Ok(msg) => msg,
                 Err(err) => {
                     log::error!("parsing websockets: {err}");
