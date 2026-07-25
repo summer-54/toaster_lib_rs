@@ -100,7 +100,7 @@ impl super::Outgo for InvokerToManager {
         match self {
             Self::Token { token, name } => {
                 let mut body = RawMessage::new("TOKEN");
-                body.add_fields(vec![(&"ID", &token), (&"KEY", &name)]);
+                body.add_fields(vec![(&"ID", &token), (&"NAME", &name)]);
                 body
             }
             Self::Exited { code, data } => {
