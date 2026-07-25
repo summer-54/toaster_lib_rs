@@ -2,18 +2,27 @@ use std::future::pending;
 
 use super::stream::Stream;
 
-pub struct Mock {
-    name: &'static str,
+pub struct Mock<O, F: Fn(O)> {
+    logger: F,
+    _marker: std::marker::PhantomData<O>,
 }
 
-impl<I, O> Stream<I, O> for Mock {
+impl<O, F: Fn(O)> Mock<O, F> {
+    pub fn new(logger: F) -> Self {
+        Self {
+            logger,
+            _marker: Default::default(),
+        }
+    }
+}
+
+impl<I, O, F: Fn(O)> Stream<I, O> for Mock<O, F> {
     fn recv(&self) -> impl Future<Output = anyhow::Result<I>> + Send {
-        log::trace!("recv mock '{}'", self.name);
         pending()
     }
 
-    fn send(&self, _: O) -> impl Future<Output = anyhow::Result<()>> + Send {
-        log::trace!("sending into mock '{}'", self.name);
+    fn send(&self, msg: O) -> impl Future<Output = anyhow::Result<()>> + Send {
+        (self.logger)(msg);
         async move { Ok(()) }
     }
 }
