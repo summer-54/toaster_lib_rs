@@ -147,7 +147,10 @@ impl Channel {
             .lock()
             .await
             .write(
-                name.bytes().chain(msg.into_bytes()).collect::<Box<[u8]>>(),
+                format!("{name}\n")
+                    .bytes()
+                    .chain(msg.into_bytes())
+                    .collect::<Box<[u8]>>(),
                 ratchet_rs::PayloadType::Binary,
             )
             .await
