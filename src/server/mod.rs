@@ -1,3 +1,4 @@
+pub mod mock;
 pub mod stream;
 pub mod websocket;
 use crate::prelude::*;

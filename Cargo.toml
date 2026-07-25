@@ -21,3 +21,4 @@ bytes = "*"
 
 sequoia-openpgp = {version = "*"}
 rand = "*"
+futures = "*"

@@ -1547,6 +1547,7 @@ dependencies = [
  "bytes",
  "bytesize",
  "colored",
+ "futures",
  "http",
  "log",
  "rand 0.10.2",
