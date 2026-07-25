@@ -142,6 +142,7 @@ impl Channel {
         }
     }
     async fn send(self: Arc<Self>, name: Box<str>, msg: RawMessage) -> Result<()> {
+        log::info!("received message: {msg:?}");
         self.write
             .lock()
             .await
