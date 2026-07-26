@@ -32,8 +32,8 @@ pub struct Stream<I> {
 }
 
 impl<I: Income, O: Outgo + Send> stream::Stream<I, O> for Stream<RawMessage> {
-    async fn recv(&self) -> Result<I> {
-        I::from_raw(
+    async fn recv(&self) -> Result<Result<I>> {
+        Ok(I::from_raw(
             self.receiver
                 .lock()
                 .await
@@ -41,7 +41,7 @@ impl<I: Income, O: Outgo + Send> stream::Stream<I, O> for Stream<RawMessage> {
                 .await
                 .context("stream was closed")?
                 .into_mapped(),
-        )
+        ))
     }
 
     async fn send(&self, msg: O) -> Result<()> {

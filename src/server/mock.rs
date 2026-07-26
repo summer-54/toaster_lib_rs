@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use std::future::pending;
 
 use super::stream::Stream;
@@ -17,11 +18,11 @@ impl<O, F: Fn(O)> Mock<O, F> {
 }
 
 impl<I, O, F: Fn(O)> Stream<I, O> for Mock<O, F> {
-    fn recv(&self) -> impl Future<Output = anyhow::Result<I>> + Send {
+    fn recv(&self) -> impl Future<Output = Result<Result<I>>> + Send {
         pending()
     }
 
-    fn send(&self, msg: O) -> impl Future<Output = anyhow::Result<()>> + Send {
+    fn send(&self, msg: O) -> impl Future<Output = Result<()>> + Send {
         (self.logger)(msg);
         async move { Ok(()) }
     }
