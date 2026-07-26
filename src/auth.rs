@@ -38,7 +38,7 @@ impl<'a> VerificationHelper for Helper<'a> {
                 Some(anyhow!(error.to_string()))
             })
         }) {
-            Err(error.into())
+            Err(error)
         } else {
             Ok(())
         }
@@ -58,7 +58,7 @@ impl From<&[u8]> for Challenge {
 impl std::ops::Deref for Challenge {
     type Target = [u8];
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
 
@@ -71,7 +71,7 @@ impl From<&[u8]> for Solution {
 impl std::ops::Deref for Solution {
     type Target = [u8];
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
 

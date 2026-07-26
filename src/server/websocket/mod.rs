@@ -112,43 +112,47 @@ impl Channel {
     pub async fn run(self: Arc<Self>) -> Result<()> {
         let this = Arc::downgrade(&self);
         drop(self);
-        if let Err(e) = loop {
-            let Some(this) = this.upgrade() else {
-                log::trace!("ws channel was dropped");
-                break Ok(());
-            };
-            let mut buf = bytes::BytesMut::new();
-            this.read
-                .lock()
-                .await
-                .read(&mut buf)
-                .await
-                .context("reading websocket messages")?;
-            let Some(endl_pos) = buf.iter().position(|&b| b == b'\n') else {
-                log::error!("message does not have any endl, so stream name cant be readed");
-                continue;
-            };
-            let stream_name = String::from_utf8(buf[..endl_pos].into())?;
-            let msg = match RawMessage::try_from(&buf[endl_pos + 1..]) {
-                Ok(msg) => msg,
-                Err(err) => {
-                    log::error!("parsing websockets: {err}");
+        if let Err(e) = async {
+            loop {
+                let Some(this) = this.upgrade() else {
+                    log::trace!("ws channel was dropped");
+                    break Ok(());
+                };
+                let mut buf = bytes::BytesMut::new();
+                this.read
+                    .lock()
+                    .await
+                    .read(&mut buf)
+                    .await
+                    .context("reading websocket messages")?;
+                let Some(endl_pos) = buf.iter().position(|&b| b == b'\n') else {
+                    log::error!("message does not have any endl, so stream name cant be readed");
                     continue;
-                }
-            };
+                };
+                let stream_name = String::from_utf8(buf[..endl_pos].into())?;
+                let msg = match RawMessage::try_from(&buf[endl_pos + 1..]) {
+                    Ok(msg) => msg,
+                    Err(err) => {
+                        log::error!("parsing websockets: {err}");
+                        continue;
+                    }
+                };
 
-            log::info!("received message: [stream_name: {stream_name}] {msg:?}");
-            let streams = this.streams.lock().await;
-            let Some(sender) = streams.get(&*stream_name) else {
-                log::error!("unknown stream name: {stream_name}");
-                continue;
-            };
+                log::info!("received message: [stream_name: {stream_name}] {msg:?}");
+                let streams = this.streams.lock().await;
+                let Some(sender) = streams.get(&*stream_name) else {
+                    log::error!("unknown stream name: {stream_name}");
+                    continue;
+                };
 
-            let _ = sender
-                .send(msg)
-                .context("internal sending message into {stream_name} channel")
-                .map_err(|err| log::warn!("{err:?}"));
-        } {
+                let _ = sender
+                    .send(msg)
+                    .context("internal sending message into {stream_name} channel")
+                    .map_err(|err| log::warn!("{err:?}"));
+            }
+        }
+        .await
+        {
             if let Some(this) = this.upgrade() {
                 this.streams.lock().await.clear();
             }
