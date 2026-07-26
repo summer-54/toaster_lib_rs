@@ -39,7 +39,7 @@ impl<I: Income, O: Outgo + Send> stream::Stream<I, O> for Stream<RawMessage> {
                 .await
                 .recv()
                 .await
-                .unwrap()
+                .context("stream was closed")?
                 .into_mapped(),
         )
     }
@@ -112,10 +112,10 @@ impl Channel {
     pub async fn run(self: Arc<Self>) -> Result<()> {
         let this = Arc::downgrade(&self);
         drop(self);
-        loop {
+        if let Err(e) = loop {
             let Some(this) = this.upgrade() else {
                 log::trace!("ws channel was dropped");
-                break;
+                break Ok(());
             };
             let mut buf = bytes::BytesMut::new();
             this.read
@@ -148,8 +148,15 @@ impl Channel {
                 .send(msg)
                 .context("internal sending message into {stream_name} channel")
                 .map_err(|err| log::warn!("{err:?}"));
+        } {
+            if let Some(this) = this.upgrade() {
+                this.streams.lock().await.clear();
+            }
+            log::error!("channel was dropped");
+            Err(e)
+        } else {
+            Ok(())
         }
-        Ok(())
     }
     async fn send(self: Arc<Self>, name: Box<str>, msg: RawMessage) -> Result<()> {
         log::trace!("sended message: {msg:?}");
