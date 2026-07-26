@@ -138,7 +138,7 @@ impl Channel {
                     }
                 };
 
-                log::info!("received message: [stream_name: {stream_name}] {msg:?}");
+                log::trace!("received message: [stream_name: {stream_name}] {msg:?}");
                 let streams = this.streams.lock().await;
                 let Some(sender) = streams.get(&*stream_name) else {
                     log::error!("unknown stream name: {stream_name}");
