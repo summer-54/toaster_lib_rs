@@ -110,9 +110,15 @@ impl Channel {
     }
 
     pub async fn run(self: Arc<Self>) -> Result<()> {
+        let this = Arc::downgrade(&self);
+        drop(self);
         loop {
+            let Some(this) = this.upgrade() else {
+                log::trace!("ws channel was dropped");
+                break;
+            };
             let mut buf = bytes::BytesMut::new();
-            self.read
+            this.read
                 .lock()
                 .await
                 .read(&mut buf)
@@ -132,14 +138,18 @@ impl Channel {
             };
 
             log::info!("received message: [stream_name: {stream_name}] {msg:?}");
-            let streams = self.streams.lock().await;
+            let streams = this.streams.lock().await;
             let Some(sender) = streams.get(&*stream_name) else {
                 log::error!("unknown stream name: {stream_name}");
                 continue;
             };
 
-            sender.send(msg)?;
+            let _ = sender
+                .send(msg)
+                .context("internal sending message into {stream_name} channel")
+                .map_err(|err| log::warn!("{err:?}"));
         }
+        Ok(())
     }
     async fn send(self: Arc<Self>, name: Box<str>, msg: RawMessage) -> Result<()> {
         log::trace!("sended message: {msg:?}");
