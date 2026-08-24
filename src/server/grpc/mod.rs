@@ -6,6 +6,11 @@ pub mod pb {
     tonic::include_proto!("invoker_manager");
 }
 
+pub use pb::invoker_manager_service_client::InvokerManagerServiceClient as Client;
+pub use pb::invoker_manager_service_server::{
+    InvokerManagerService as Service, InvokerManagerServiceServer as Server,
+};
+
 use crate::prelude::*;
 
 use tokio::sync::{
