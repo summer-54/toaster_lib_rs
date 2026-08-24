@@ -19,8 +19,17 @@ use tokio::sync::{
 };
 
 pub struct Stream<I, O> {
-    sender: UnboundedSender<O>,
     receiver: Mutex<UnboundedReceiver<I>>,
+    sender: UnboundedSender<O>,
+}
+
+impl<I, O> Stream<I, O> {
+    pub fn new(receiver: UnboundedReceiver<I>, sender: UnboundedSender<O>) -> Self {
+        Self {
+            receiver: Mutex::new(receiver),
+            sender,
+        }
+    }
 }
 
 impl<I, O, SI, SO> super::stream::Stream<I, O> for Stream<SI, SO>
