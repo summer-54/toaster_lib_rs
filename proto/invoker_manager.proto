@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package invoker_manager;
+
+// ==========================================
+// Enumerations
+// ==========================================
+
+enum Language {
+  LANG_UNSPECIFIED = 0;
+  LANG_GPP = 1;
+  LANG_PYTHON3 = 2;
+}
+
+enum TestVerdict {
+  VERDICT_UNSPECIFIED = 0;
+  OK = 1;
+  WA = 2;
+  TL = 3;
+  ML = 4;
+  SL = 5;
+  RE = 6;
+  CE = 7;
+  TE = 8;
+  PE = 9;
+}
+
+enum FullVerdict {
+  FULL_VERDICT_UNSPECIFIED = 0;
+  FULL_OK = 1;
+  FULL_CE = 2;
+  FULL_TE = 3;
+}
+
+enum AuthVerdict {
+  AUTH_UNSPECIFIED = 0;
+  APPROVED = 1;
+  DENIED = 2;
+}
+
+// ==========================================
+// Master Stream Messages
+// ==========================================
+
+// --- Income (Master -> Invoker) ---
+message CloseInvoker {
+  // Пустое сообщение-сигнал
+}
+
+// Обертка для входящих в стрим сообщений (Master -> Invoker)
+message MasterOutgo {
+  oneof payload {
+    CloseInvoker close = 1;
+  }
+}
+
+message Exited {
+  uint32 code = 1;
+  string message = 2; // exit data
+}
+
+message MasterIncome {
+  oneof payload {
+    Exited exited = 6;
+  }
+}
+
+// ==========================================
+// Judge Stream Messages
+// ==========================================
+
+message TestResult {
+  uint32 id = 1;
+  TestVerdict verdict = 2;
+  double time_sec = 3; // Время в миллисекундах (или double time_sec)
+  uint64 memory_bytes = 4; // Память в байтах (или int32 memory_kb)
+  bytes data = 5; // tar: (output, message)
+}
+
+message FullResult {
+  FullVerdict verdict = 1;
+
+  oneof details {
+    SuccessDetails success = 2;
+    ErrorDetails error = 3;
+  }
+
+  message SuccessDetails {
+    uint32 sum = 1;
+    repeated uint32 groups = 2;
+  }
+
+  message ErrorDetails {
+    string message = 1;
+  }
+}
+
+message InvokerError {
+  string message = 1;
+}
+
+message OperatorError {
+  string message = 1;
+}
+
+message RunTask {
+  Language lang = 2;
+  bytes data = 3; // binary data: problem package
+}
+
+message StopTask {
+  // Пустое сообщение-сигнал
+}
+
+message JudgeOutgo {
+  oneof payload {
+    RunTask run = 1;
+    StopTask stop = 2;
+  }
+}
+
+message JudgeIncome {
+  oneof payload {
+    TestResult test_result = 2;
+    FullResult full_result = 3;
+    InvokerError error = 4;
+    OperatorError operror = 5;
+  }
+}
+
+// ==========================================
+// Auth Stream Messages
+// ==========================================
+
+message AuthChallenge {
+  bytes data = 1;
+}
+
+message AuthOutgo {
+  oneof payload {
+    AuthChallenge challenge = 1;
+    AuthVerdict verdict = 2;
+  }
+}
+
+message AuthProof {
+  bytes data = 1;
+}
+
+message CertName {
+  string name = 1;
+}
+
+message AuthIncome {
+  oneof payload {
+    CertName cert = 1;
+    AuthProof proof = 2;
+  }
+}
+
+// ==========================================
+// gRPC Service Definition
+// ==========================================
+
+service InvokerManagerService {
+  rpc MasterStream(stream MasterIncome) returns (stream MasterOutgo);
+  rpc JudgeStream(stream JudgeIncome) returns (stream JudgeOutgo);
+  rpc Auth(stream AuthIncome) returns (stream AuthOutgo);
+}

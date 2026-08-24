@@ -14,11 +14,18 @@ bytesize = "*"
 
 http = {version = "*"}
 
-ratchet_rs = { version = "*", features = ["deflate", "split"] }
-tokio = "*"
+tokio = {version = "*", features = ["full"]}
 log = "*"
 bytes = "*"
 
 sequoia-openpgp = {version = "*"}
 rand = "*"
 futures = "*"
+
+tonic = "*"
+prost = "0.14"
+tonic-prost = "*"
+
+[build-dependencies]
+
+tonic-prost-build = "*"
