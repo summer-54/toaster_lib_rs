@@ -27,7 +27,9 @@ impl From<auth::InvokerToManager> for pb::AuthIncome {
                     })
                 }
                 auth::InvokerToManager::CertName(name) => {
-                    pb::auth_income::Payload::Cert(pb::CertName { name: name.into() })
+                    pb::auth_income::Payload::Cert(pb::CertName {
+                        name: name.to_string(),
+                    })
                 }
             }),
         }

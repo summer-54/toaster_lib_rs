@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::{io::Write, ops::Deref, sync::Arc};
 
 use rand::{CryptoRng, Rng};
 
@@ -113,6 +113,62 @@ impl Solution {
         let mut verifier = verifier.with_policy(policy, None, Helper(cert))?;
         verifier.verify_bytes(&**challenge)?;
         Ok(())
+    }
+}
+
+#[repr(transparent)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct CertName(Arc<str>);
+
+impl CertName {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    pub fn into_inner(self) -> Arc<str> {
+        self.0
+    }
+}
+
+impl Deref for CertName {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl<T: Into<Arc<str>>> From<T> for CertName {
+    fn from(value: T) -> Self {
+        Self(value.into())
+    }
+}
+
+#[repr(transparent)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct Token(Arc<str>);
+
+impl Token {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    pub fn into_inner(self) -> Arc<str> {
+        self.0
+    }
+}
+
+impl Deref for Token {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl<T: Into<Arc<str>>> From<T> for Token {
+    fn from(value: T) -> Self {
+        Self(value.into())
     }
 }
 
