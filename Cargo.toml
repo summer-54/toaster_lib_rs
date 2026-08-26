@@ -15,6 +15,7 @@ bytesize = "*"
 http = {version = "*"}
 
 tokio = {version = "*", features = ["full"]}
+tokio-stream = "*"
 log = "*"
 bytes = "*"
 

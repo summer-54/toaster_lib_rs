@@ -23,6 +23,25 @@ pub struct ClientStream<I, O, S: futures::Stream<Item = Result<I, Status>>> {
     sender: UnboundedSender<O>,
 }
 
+impl<I, O> ClientStream<I, O, tonic::Streaming<I>> {
+    pub async fn from<F>(value: F) -> Result<Self>
+    where
+        F: AsyncFnOnce(
+            tonic::Request<tokio_stream::wrappers::UnboundedReceiverStream<O>>,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<I>>,
+            tonic::Status,
+        >,
+    {
+        let (sender_outgo, receiver_outgo) = tokio::sync::mpsc::unbounded_channel();
+        let request = tonic::Request::new(tokio_stream::wrappers::UnboundedReceiverStream::new(
+            receiver_outgo,
+        ));
+        let response = value(request).await.context("gRPC execution")?.into_inner();
+        Ok(Self::new(response, sender_outgo))
+    }
+}
+
 impl<I, O, S: futures::Stream<Item = Result<I, Status>>> ClientStream<I, O, S> {
     pub fn new(receiver: S, sender: UnboundedSender<O>) -> Self {
         Self {

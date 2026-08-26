@@ -1671,6 +1671,7 @@ dependencies = [
  "sequoia-openpgp",
  "serde",
  "tokio",
+ "tokio-stream",
  "tonic",
  "tonic-prost",
  "tonic-prost-build",
