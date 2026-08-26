@@ -57,12 +57,12 @@ where
     }
 }
 
-pub struct ServerStream<I, O, S: futures::Stream<Item = I>> {
+pub struct ServerStream<I, O, S: futures::Stream<Item = Result<I, Status>>> {
     receiver: Mutex<S>,
     sender: UnboundedSender<Result<O, Status>>,
 }
 
-impl<I, O, S: futures::Stream<Item = I>> ServerStream<I, O, S> {
+impl<I, O, S: futures::Stream<Item = Result<I, Status>>> ServerStream<I, O, S> {
     pub fn new(receiver: S, sender: UnboundedSender<Result<O, Status>>) -> Self {
         Self {
             receiver: Mutex::new(receiver),
@@ -76,20 +76,19 @@ where
     SI: TryInto<I, Error = Error> + Send,
     O: Into<SO> + Send,
     SO: Send + Sync + 'static,
-    S: futures::Stream<Item = SI> + Unpin + Send,
+    S: futures::Stream<Item = Result<SI, Status>> + Unpin + Send,
 {
     async fn recv(&self) -> anyhow::Result<anyhow::Result<I>> {
-        Ok({
-            Ok(self
-                .receiver
-                .lock()
-                .await
-                .next()
-                .await
-                .context("receiving message")?
-                .try_into()
-                .context("converting message")?)
-        })
+        Ok(self
+            .receiver
+            .lock()
+            .await
+            .next()
+            .await
+            .context("receiving message")?
+            .context("reading message")?
+            .try_into()
+            .context("converting message"))
     }
 
     async fn send(&self, msg: O) -> anyhow::Result<()> {
