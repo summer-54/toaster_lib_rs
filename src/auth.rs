@@ -12,6 +12,7 @@ use sequoia_openpgp::{
 pub use pgp::{Cert, parse::Parse, policy};
 
 use anyhow::{Error, Result, anyhow};
+use serde::{Deserialize, Serialize};
 
 struct Helper<'a>(&'a Cert);
 
@@ -117,7 +118,7 @@ impl Solution {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct CertName(Arc<str>);
 
 impl CertName {
@@ -145,7 +146,7 @@ impl<T: Into<Arc<str>>> From<T> for CertName {
 }
 
 #[repr(transparent)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Token(Arc<str>);
 
 impl Token {

@@ -9,7 +9,7 @@ colored = "*"
 anyhow = "*"
 uuid = "*"
 
-serde = {version = "*", features = ["derive"]}
+serde = {version = "*", features = ["derive", "rc"]}
 bytesize = "*"
 
 http = {version = "*"}
