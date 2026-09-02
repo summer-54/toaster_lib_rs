@@ -149,7 +149,7 @@ where
     O: Into<SO> + Send,
     SO: Send + Sync + 'static,
     S: futures::Stream<Item = Result<SI, Status>> + Unpin + Send,
-    E: Into<Error> + Sync + Send + std::error::Error + 'static,
+    E: Into<Error>,
 {
     async fn recv(&self) -> anyhow::Result<anyhow::Result<I>> {
         Ok(I::try_from(
