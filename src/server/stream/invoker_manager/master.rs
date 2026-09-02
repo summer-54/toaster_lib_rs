@@ -1,6 +1,5 @@
 pub const NAME: &str = "master";
 
-#[allow(dead_code)]
 pub enum ManagerToInvoker {
     Close,
 }
@@ -13,7 +12,6 @@ impl std::fmt::Debug for ManagerToInvoker {
     }
 }
 
-#[allow(dead_code)]
 pub enum InvokerToManager {
     Exited { code: u8, data: Box<str> },
 }

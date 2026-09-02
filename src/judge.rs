@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, ops::Deref};
 
 use crate::prelude::*;
 
@@ -34,6 +34,34 @@ impl Display for Lang {
                 Self::Python => "python3",
             }
         )
+    }
+}
+
+#[repr(transparent)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct ErrorMsg(Box<str>);
+
+impl ErrorMsg {
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+
+    pub fn into_inner(self) -> Box<str> {
+        self.0
+    }
+}
+
+impl Deref for ErrorMsg {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.as_str()
+    }
+}
+
+impl<T: Into<Box<str>>> From<T> for ErrorMsg {
+    fn from(value: T) -> Self {
+        Self(value.into())
     }
 }
 
@@ -126,14 +154,54 @@ pub mod test {
         pub data: Box<[u8]>,
     }
 }
+
 pub mod submission {
+    use std::ops::Deref;
+
+    use uuid::Uuid;
+
+    use crate::judge::test;
+
+    #[repr(transparent)]
+    #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+    pub struct SubmissionId(Uuid);
+
+    impl SubmissionId {
+        pub fn into_inner(self) -> Uuid {
+            self.0
+        }
+
+        pub fn new(s: Uuid) -> Self {
+            Self(s)
+        }
+    }
+
+    impl Deref for SubmissionId {
+        type Target = Uuid;
+
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+
+    impl<T: Into<Uuid>> From<T> for SubmissionId {
+        fn from(value: T) -> Self {
+            Self(value.into())
+        }
+    }
+
     #[derive(Debug, Clone)]
-    pub enum Result {
+
+    pub enum ResultWrapper<T> {
         Ok {
             score: usize,
-            groups_score: Box<[usize]>,
+            group_scores: Box<[usize]>,
+            value: T,
         },
         Ce(Box<str>),
         Te(Box<str>),
     }
+
+    pub type Result = ResultWrapper<()>;
+    pub type FullResult = ResultWrapper<Box<[Option<test::Result>]>>;
 }

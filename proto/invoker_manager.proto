@@ -2,83 +2,28 @@ syntax = "proto3";
 
 package invoker_manager;
 
-// ==========================================
-// Enumerations
-// ==========================================
-
-enum Language {
-  LANG_UNSPECIFIED = 0;
-  LANG_GPP = 1;
-  LANG_PYTHON3 = 2;
-}
-
-enum TestVerdict {
-  VERDICT_UNSPECIFIED = 0;
-  OK = 1;
-  WA = 2;
-  TL = 3;
-  ML = 4;
-  SL = 5;
-  RE = 6;
-  CE = 7;
-  TE = 8;
-  PE = 9;
-}
-
-enum FullVerdict {
-  FULL_VERDICT_UNSPECIFIED = 0;
-  FULL_OK = 1;
-  FULL_CE = 2;
-  FULL_TE = 3;
-}
+import "toaster.proto";
 
 enum AuthVerdict {
-  AUTH_UNSPECIFIED = 0;
-  APPROVED = 1;
-  DENIED = 2;
+  AUTH_VERDICT_UNSPECIFIED = 0;
+  AUTH_VERDICT_APPROVED = 1;
+  AUTH_VERDICT_DENIED = 2;
 }
-
-// ==========================================
-// Master Stream Messages
-// ==========================================
-
-// --- Income (Master -> Invoker) ---
-message CloseInvoker {
-  // Пустое сообщение-сигнал
-}
-
-// Обертка для входящих в стрим сообщений (Master -> Invoker)
-message MasterOutgo {
-  oneof payload {
-    CloseInvoker close = 1;
-  }
-}
+message CloseInvoker {}
 
 message Exited {
   uint32 code = 1;
   string message = 2; // exit data
 }
 
-message MasterIncome {
-  oneof payload {
-    Exited exited = 6;
-  }
-}
-
-// ==========================================
-// Judge Stream Messages
-// ==========================================
-
-message TestResult {
+message TestResultPayload {
   uint32 id = 1;
-  TestVerdict verdict = 2;
-  double time_sec = 3; // Время в миллисекундах (или double time_sec)
-  uint64 memory_bytes = 4; // Память в байтах (или int32 memory_kb)
-  bytes data = 5; // tar: (output, message)
+  toaster.TestResult result = 2;
+  bytes data = 3; // tar: (output, message)
 }
 
-message FullResult {
-  FullVerdict verdict = 1;
+message SubmissionResult {
+  toaster.SubmissionVerdict verdict = 1;
 
   oneof details {
     SuccessDetails success = 2;
@@ -86,8 +31,8 @@ message FullResult {
   }
 
   message SuccessDetails {
-    uint32 sum = 1;
-    repeated uint32 groups = 2;
+    uint32 score = 1;
+    repeated uint32 group_scores = 2;
   }
 
   message ErrorDetails {
@@ -95,21 +40,38 @@ message FullResult {
   }
 }
 
-message InvokerError {
-  string message = 1;
-}
-
-message OperatorError {
+message Error {
   string message = 1;
 }
 
 message RunTask {
-  Language lang = 2;
+  toaster.Lang lang = 2;
   bytes data = 3; // binary data: problem package
 }
 
-message StopTask {
-  // Пустое сообщение-сигнал
+message StopTask {}
+message AuthChallenge {
+  bytes data = 1;
+}
+
+message AuthProof {
+  bytes data = 1;
+}
+
+message CertName {
+  string name = 1;
+}
+
+message MasterOutgo {
+  oneof payload {
+    CloseInvoker close = 1;
+  }
+}
+
+message MasterIncome {
+  oneof payload {
+    Exited exited = 6;
+  }
 }
 
 message JudgeOutgo {
@@ -121,19 +83,10 @@ message JudgeOutgo {
 
 message JudgeIncome {
   oneof payload {
-    TestResult test_result = 2;
-    FullResult full_result = 3;
-    InvokerError error = 4;
-    OperatorError operror = 5;
+    TestResultPayload test_result_payload = 2;
+    SubmissionResult submission_result = 3;
+    Error error = 4;
   }
-}
-
-// ==========================================
-// Auth Stream Messages
-// ==========================================
-
-message AuthChallenge {
-  bytes data = 1;
 }
 
 message AuthOutgo {
@@ -143,17 +96,9 @@ message AuthOutgo {
   }
 }
 
-message AuthProof {
-  bytes data = 1;
-}
-
-message CertName {
-  string name = 1;
-}
-
 message AuthIncome {
   oneof payload {
-    CertName cert = 1;
+    CertName cert_name = 1;
     AuthProof proof = 2;
   }
 }

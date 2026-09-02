@@ -1,6 +1,5 @@
-pub mod auth;
-pub mod judge;
-pub mod master;
+pub mod invoker_manager;
+pub mod testing_system;
 
 use crate::prelude::*;
 

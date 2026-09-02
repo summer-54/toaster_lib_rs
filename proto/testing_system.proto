@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package testing_system;
+
+import "toaster.proto";
+
+message SubmissionId {
+  bytes id = 1;
+}
+
+message TestData {
+  SubmissionId submission_id = 1;
+  uint32 test_id = 2;
+  bytes data = 3;
+}
+
+message SubmissionResult {
+  SubmissionId submission_id = 1;
+  toaster.SubmissionVerdict verdict = 2;
+
+  oneof details {
+    SuccessDetails success = 3;
+    ErrorDetails error = 4;
+  }
+
+  message SuccessDetails {
+    uint32 score = 1;
+    repeated uint32 group_scores = 2;
+    repeated TestResult test_results = 3;
+
+    message TestResult {
+      optional toaster.TestResult result = 4;
+    }
+  }
+
+  message ErrorDetails {
+    string message = 1;
+  }
+}
+
+message JudgeSubmission {
+  SubmissionId submission_id = 1;
+  uint32 tests_count = 2;
+  toaster.Lang lang = 3;
+  bytes data = 4; // binary data: problem package
+}
+
+message Income {
+  oneof payload {
+    TestData test_data = 1;
+    SubmissionResult submission_result = 2;
+  }
+}
+
+message Outgo {
+  oneof payload {
+    JudgeSubmission judge_submission = 1;
+  }
+}
+
+service TestingSystemService {
+  rpc Stream(stream Income) returns (stream Outgo);
+}

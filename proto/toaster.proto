@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package toaster;
+
+// ==========================================
+// Enumerations
+// ==========================================
+
+enum Lang {
+  LANG_UNSPECIFIED = 0;
+  LANG_GPP = 1;
+  LANG_PYTHON3 = 2;
+}
+
+enum TestVerdict {
+  TEST_VERDICT_UNSPECIFIED = 0;
+  TEST_VERDICT_OK = 1;
+  TEST_VERDICT_WA = 2;
+  TEST_VERDICT_TL = 3;
+  TEST_VERDICT_ML = 4;
+  TEST_VERDICT_SL = 5;
+  TEST_VERDICT_RE = 6;
+  TEST_VERDICT_CE = 7;
+  TEST_VERDICT_TE = 8;
+  TEST_VERDICT_PE = 9;
+}
+
+enum SubmissionVerdict {
+  SUBMISSION_VERDICT_UNSPECIFIED = 0;
+  SUBMISSION_VERDICT_OK = 1;
+  SUBMISSION_VERDICT_CE = 2;
+  SUBMISSION_VERDICT_TE = 3;
+}
+
+message TestResult {
+  TestVerdict verdict = 1;
+  double time_sec = 2;
+  uint64 memory_bytes = 3;
+}

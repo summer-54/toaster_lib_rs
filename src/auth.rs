@@ -129,6 +129,10 @@ impl CertName {
     pub fn into_inner(self) -> Arc<str> {
         self.0
     }
+
+    pub fn new(s: &str) -> Self {
+        Self(Arc::from(s))
+    }
 }
 
 impl Deref for CertName {

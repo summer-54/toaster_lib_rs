@@ -1,5 +1,5 @@
 use crate::{
-    judge::{Lang, submission, test},
+    judge::{ErrorMsg, Lang, submission, test},
     logger::short_slice,
 };
 
@@ -26,24 +26,24 @@ impl std::fmt::Debug for ManagerToInvoker {
 
 #[allow(dead_code)]
 pub enum InvokerToManager {
-    FullResult(submission::Result),
-    TestResult(test::ResultPayload),
-    Error { msg: Box<str> },
-    OpError { msg: Box<str> },
+    SubmissionResult(submission::Result),
+    TestResultPayload(test::ResultPayload),
+    Error(ErrorMsg),
 }
 
 impl std::fmt::Debug for InvokerToManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::FullResult(result) => f.debug_tuple("FullResult").field(result).finish(),
-            Self::TestResult(test::ResultPayload { id, result, data }) => f
+            Self::SubmissionResult(result) => {
+                f.debug_tuple("SubmissionResult").field(result).finish()
+            }
+            Self::TestResultPayload(test::ResultPayload { id, result, data }) => f
                 .debug_struct("TestVerdict")
                 .field("id", id)
                 .field("result", result)
                 .field("data", &Box::<[u8]>::from(short_slice(data)))
                 .finish(),
-            Self::Error { msg } => f.debug_struct("Error").field("msg", msg).finish(),
-            Self::OpError { msg } => f.debug_struct("OpError").field("msg", msg).finish(),
+            Self::Error(msg) => f.debug_struct("Error").field("msg", msg).finish(),
         }
     }
 }
