@@ -1,24 +1,5 @@
 use super::super::{super::stream::invoker_manager::auth, pb::invoker_manager as im_pb};
-use crate::{
-    auth::{CertName, Challenge},
-    prelude::*,
-};
-
-impl TryFrom<im_pb::CertName> for CertName {
-    type Error = Error;
-
-    fn try_from(proto: im_pb::CertName) -> Result<Self> {
-        Ok(CertName::new(&proto.name))
-    }
-}
-
-impl From<CertName> for im_pb::CertName {
-    fn from(name: CertName) -> Self {
-        Self {
-            name: name.to_string(),
-        }
-    }
-}
+use crate::{auth::Challenge, prelude::*};
 
 impl TryFrom<im_pb::AuthIncome> for auth::InvokerToManager {
     type Error = Error;
@@ -29,9 +10,6 @@ impl TryFrom<im_pb::AuthIncome> for auth::InvokerToManager {
         };
 
         Ok(match payload {
-            im_pb::auth_income::Payload::CertName(cert_name) => {
-                auth::InvokerToManager::CertName(cert_name.name.into())
-            }
             im_pb::auth_income::Payload::Proof(auth_proof) => {
                 auth::InvokerToManager::AuthProof((&*auth_proof.data).into())
             }
@@ -46,11 +24,6 @@ impl From<auth::InvokerToManager> for im_pb::AuthIncome {
                 auth::InvokerToManager::AuthProof(solution) => {
                     im_pb::auth_income::Payload::Proof(im_pb::AuthProof {
                         data: Vec::from(&*solution),
-                    })
-                }
-                auth::InvokerToManager::CertName(name) => {
-                    im_pb::auth_income::Payload::CertName(im_pb::CertName {
-                        name: name.to_string(),
                     })
                 }
             }),

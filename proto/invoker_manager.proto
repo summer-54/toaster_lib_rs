@@ -58,10 +58,6 @@ message AuthProof {
   bytes data = 1;
 }
 
-message CertName {
-  string name = 1;
-}
-
 message MasterOutgo {
   oneof payload {
     CloseInvoker close = 1;
@@ -98,7 +94,6 @@ message AuthOutgo {
 
 message AuthIncome {
   oneof payload {
-    CertName cert_name = 1;
     AuthProof proof = 2;
   }
 }

@@ -1,4 +1,4 @@
-use crate::auth::{self, Challenge, Solution};
+use crate::auth::{Challenge, Solution};
 
 use crate::logger::short_slice;
 
@@ -25,7 +25,6 @@ impl std::fmt::Debug for ManagerToInvoker {
 
 pub enum InvokerToManager {
     AuthProof(Solution),
-    CertName(auth::CertName),
 }
 
 impl std::fmt::Debug for InvokerToManager {
@@ -35,7 +34,6 @@ impl std::fmt::Debug for InvokerToManager {
                 .debug_struct("AuthProof")
                 .field("data", &Box::<[u8]>::from(short_slice(data)))
                 .finish(),
-            Self::CertName(name) => f.debug_struct("CertName").field("data", &name).finish(),
         }
     }
 }
