@@ -14,13 +14,6 @@ pub mod pb {
 }
 
 use futures::StreamExt;
-pub use pb::{
-    invoker_manager::{
-        invoker_manager_service_client::InvokerManagerServiceClient,
-        invoker_manager_service_server::{InvokerManagerService, InvokerManagerServiceServer},
-    },
-    toaster,
-};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use tonic::Status;
 
