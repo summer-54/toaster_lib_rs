@@ -1,5 +1,12 @@
 use uuid::Uuid;
 
+pub use ts_pb::{
+    testing_system_service_client::TestingSystemServiceClient as Client,
+    testing_system_service_server::{
+        TestingSystemService as Service, TestingSystemServiceServer as Server,
+    },
+};
+
 use super::{
     super::stream::testing_system::{ManagerToSystem, SystemToManager},
     pb::{testing_system as ts_pb, toaster as pb},

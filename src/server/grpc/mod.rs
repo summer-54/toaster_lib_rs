@@ -16,7 +16,7 @@ pub mod pb {
 use futures::StreamExt;
 pub use pb::{
     invoker_manager::{
-        invoker_manager_service_client::InvokerManagerServiceClient as Client,
+        invoker_manager_service_client::InvokerManagerServiceClient,
         invoker_manager_service_server::{InvokerManagerService, InvokerManagerServiceServer},
     },
     toaster,
