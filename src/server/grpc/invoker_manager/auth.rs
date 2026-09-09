@@ -1,13 +1,14 @@
-use super::super::{super::stream::invoker_manager::auth, pb::invoker_manager as im_pb};
-use crate::{auth::Challenge, prelude::*};
+use super::super::{
+    super::stream::invoker_manager::auth, ConvertError, FieldContext, pb::invoker_manager as im_pb,
+    unwrap_field,
+};
+use crate::auth::Challenge;
 
 impl TryFrom<im_pb::AuthIncome> for auth::InvokerToManager {
-    type Error = Error;
+    type Error = ConvertError;
 
-    fn try_from(proto: im_pb::AuthIncome) -> Result<Self> {
-        let Some(payload) = proto.payload else {
-            bail!("payload not found");
-        };
+    fn try_from(proto: im_pb::AuthIncome) -> Result<Self, Self::Error> {
+        let payload = unwrap_field("payload", proto.payload)?;
 
         Ok(match payload {
             im_pb::auth_income::Payload::Proof(auth_proof) => {
@@ -32,25 +33,31 @@ impl From<auth::InvokerToManager> for im_pb::AuthIncome {
 }
 
 impl TryFrom<im_pb::AuthOutgo> for auth::ManagerToInvoker {
-    type Error = Error;
+    type Error = ConvertError;
 
-    fn try_from(proto: im_pb::AuthOutgo) -> Result<Self> {
-        let Some(payload) = proto.payload else {
-            bail!("payload not found");
-        };
+    fn try_from(proto: im_pb::AuthOutgo) -> Result<Self, Self::Error> {
+        let payload = unwrap_field("payload", proto.payload)?;
 
-        Ok(match payload {
-            im_pb::auth_outgo::Payload::Challenge(auth_challenge) => {
-                auth::ManagerToInvoker::Challenge(Challenge::from(&*auth_challenge.data))
-            }
-            im_pb::auth_outgo::Payload::Verdict(verdict) => {
-                auth::ManagerToInvoker::Verdict(match im_pb::AuthVerdict::try_from(verdict)? {
-                    im_pb::AuthVerdict::Unspecified => bail!("AuthVerdict unspecified"),
-                    im_pb::AuthVerdict::Approved => true,
-                    im_pb::AuthVerdict::Denied => false,
-                })
-            }
-        })
+        (|| {
+            Ok(match payload {
+                im_pb::auth_outgo::Payload::Challenge(auth_challenge) => {
+                    auth::ManagerToInvoker::Challenge(Challenge::from(&*auth_challenge.data))
+                }
+                im_pb::auth_outgo::Payload::Verdict(verdict) => auth::ManagerToInvoker::Verdict({
+                    (|| {
+                        Ok(match im_pb::AuthVerdict::try_from(verdict)? {
+                            im_pb::AuthVerdict::Unspecified => {
+                                return Err(ConvertError::EnumUnspecified);
+                            }
+                            im_pb::AuthVerdict::Approved => true,
+                            im_pb::AuthVerdict::Denied => false,
+                        })
+                    })()
+                    .at_field("verdict")?
+                }),
+            })
+        })()
+        .at_field("payload")
     }
 }
 

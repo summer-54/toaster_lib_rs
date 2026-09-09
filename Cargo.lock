@@ -1670,6 +1670,7 @@ dependencies = [
  "rand",
  "sequoia-openpgp",
  "serde",
+ "thiserror",
  "tokio",
  "tokio-stream",
  "tonic",

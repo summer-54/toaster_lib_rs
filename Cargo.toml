@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 
 colored = "*"
+thiserror = "*"
 anyhow = "*"
 uuid = "*"
 
@@ -26,6 +27,7 @@ futures = "*"
 tonic = "*"
 prost = "0.14"
 tonic-prost = "*"
+
 
 [build-dependencies]
 

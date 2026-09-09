@@ -1,8 +1,9 @@
 use super::super::{
     super::stream::invoker_manager::master::{InvokerToManager, ManagerToInvoker},
+    ConvertError,
     pb::invoker_manager as im_pb,
+    unwrap_field,
 };
-use crate::prelude::*;
 
 impl From<InvokerToManager> for im_pb::MasterIncome {
     fn from(domain: InvokerToManager) -> Self {
@@ -20,12 +21,10 @@ impl From<InvokerToManager> for im_pb::MasterIncome {
 }
 
 impl TryFrom<im_pb::MasterIncome> for InvokerToManager {
-    type Error = Error;
+    type Error = ConvertError;
 
     fn try_from(proto: im_pb::MasterIncome) -> Result<Self, Self::Error> {
-        let Some(payload) = proto.payload else {
-            bail!("payload not found");
-        };
+        let payload = unwrap_field("payload", proto.payload)?;
 
         Ok(match payload {
             im_pb::master_income::Payload::Exited(exited) => InvokerToManager::Exited {
@@ -49,12 +48,10 @@ impl From<ManagerToInvoker> for im_pb::MasterOutgo {
 }
 
 impl TryFrom<im_pb::MasterOutgo> for ManagerToInvoker {
-    type Error = Error;
+    type Error = ConvertError;
 
     fn try_from(proto: im_pb::MasterOutgo) -> Result<Self, Self::Error> {
-        let Some(payload) = proto.payload else {
-            bail!("payload not found");
-        };
+        let payload = unwrap_field("payload", proto.payload)?;
 
         Ok(match payload {
             im_pb::master_outgo::Payload::Close(_) => ManagerToInvoker::Close,
