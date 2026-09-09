@@ -12,6 +12,7 @@ uuid = "*"
 
 serde = {version = "*", features = ["derive", "rc"]}
 bytesize = "*"
+serde_yml = {version = "*"}
 
 http = {version = "*"}
 
@@ -27,6 +28,7 @@ futures = "*"
 tonic = "*"
 prost = "0.14"
 tonic-prost = "*"
+
 
 
 [build-dependencies]

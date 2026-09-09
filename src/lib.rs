@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod config;
 pub mod judge;
 pub mod logger;
 pub mod poll;
