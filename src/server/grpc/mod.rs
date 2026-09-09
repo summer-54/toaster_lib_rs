@@ -36,7 +36,7 @@ pub enum ConvertError {
     #[error("{0}")]
     UnknowEnumValue(#[from] prost::UnknownEnumValue),
     #[error("{0}")]
-    OtherError(Box<str>),
+    Other(Box<str>),
 }
 
 pub trait FieldContext {

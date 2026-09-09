@@ -111,7 +111,7 @@ impl TryFrom<ts_pb::Income> for ManagerToSystem {
                             let ts_pb::submission_result::Details::Success(detailes) =
                                 unwrap_field("detailes", submission_result.details)?
                                 else {
-                                    return Err(ConvertError::OtherError("details incorrect".into()));
+                                    return Err(ConvertError::Other("details incorrect".into()));
                                 };
                             let submission_id =
                                 convert_unwrap_field("submission_id", submission_result.submission_id)?;
@@ -143,7 +143,7 @@ impl TryFrom<ts_pb::Income> for ManagerToSystem {
                             let ts_pb::submission_result::Details::Error(details) =
                                 unwrap_field("detailes",submission_result.details)?
                                 else {
-                                    return Err(ConvertError::OtherError("expected error details for CE verdict".into()))
+                                    return Err(ConvertError::Other("expected error details for CE verdict".into()))
                                 };
                             let submission_id =
                                 convert_unwrap_field("submission_id", submission_result.submission_id)?;
@@ -155,7 +155,7 @@ impl TryFrom<ts_pb::Income> for ManagerToSystem {
                         pb::SubmissionVerdict::Te => {
                             let ts_pb::submission_result::Details::Error(details) = unwrap_field("detailes",submission_result.details)?
                                 else {
-                                    return Err(ConvertError::OtherError("expected error details for TE verdict".into()))
+                                    return Err(ConvertError::Other("expected error details for TE verdict".into()))
                                 };
                             let submission_id =
                                 convert_unwrap_field("submission_id", submission_result.submission_id)?;

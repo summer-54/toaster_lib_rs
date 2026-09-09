@@ -20,7 +20,7 @@ impl TryFrom<im_pb::SubmissionResult> for submission::Result {
                 }
                 pb::SubmissionVerdict::Ok => {
                     let im_pb::submission_result::Details::Success(details) = details else {
-                        return Err(ConvertError::OtherError(
+                        return Err(ConvertError::Other(
                             "details not success while verdct is success".into(),
                         ));
                     };
@@ -36,7 +36,7 @@ impl TryFrom<im_pb::SubmissionResult> for submission::Result {
                 }
                 pb::SubmissionVerdict::Ce => {
                     let im_pb::submission_result::Details::Error(details) = details else {
-                        return Err(ConvertError::OtherError(
+                        return Err(ConvertError::Other(
                             "details is success while verdct is not success".into(),
                         ));
                     };
@@ -44,7 +44,7 @@ impl TryFrom<im_pb::SubmissionResult> for submission::Result {
                 }
                 pb::SubmissionVerdict::Te => {
                     let im_pb::submission_result::Details::Error(details) = details else {
-                        return Err(ConvertError::OtherError(
+                        return Err(ConvertError::Other(
                             "details is success while verdct is not success".into(),
                         ));
                     };
