@@ -95,6 +95,7 @@ impl TryFrom<pb::toaster::Lang> for Lang {
             pb::toaster::Lang::Unspecified => return Err(ConvertError::EnumUnspecified),
             pb::toaster::Lang::Gpp => Lang::Gpp,
             pb::toaster::Lang::Python3 => Lang::Python,
+            pb::toaster::Lang::Docker => Lang::Docker,
         })
     }
 }
@@ -104,6 +105,7 @@ impl From<Lang> for pb::toaster::Lang {
         match lang {
             Lang::Gpp => pb::toaster::Lang::Gpp,
             Lang::Python => pb::toaster::Lang::Python3,
+            Lang::Docker => pb::toaster::Lang::Docker,
         }
     }
 }

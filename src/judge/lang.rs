@@ -11,6 +11,8 @@ pub enum Lang {
     Gpp,
     #[serde(rename = "python3")]
     Python,
+    #[serde(rename = "docker")]
+    Docker,
 }
 
 impl FromStr for Lang {
@@ -19,6 +21,7 @@ impl FromStr for Lang {
         match &*s.to_lowercase() {
             "g++" => Ok(Lang::Gpp),
             "python3" => Ok(Lang::Python),
+            "docker" => Ok(Lang::Docker),
             _ => Err(ParseError),
         }
     }
@@ -32,6 +35,7 @@ impl Display for Lang {
             match self {
                 Self::Gpp => "g++",
                 Self::Python => "python3",
+                Self::Docker => "docker",
             }
         )
     }

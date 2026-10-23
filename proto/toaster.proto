@@ -10,6 +10,7 @@ enum Lang {
   LANG_UNSPECIFIED = 0;
   LANG_GPP = 1;
   LANG_PYTHON3 = 2;
+  LANG_DOCKER = 3;
 }
 
 enum TestVerdict {
